@@ -1,4 +1,10 @@
+import 'dart:io';
+
 class MinecraftRichText {}
+
+void main() {
+  // generateDataPack();
+}
 
 class Item {
   MinecraftRichText? itemName;
@@ -6,8 +12,78 @@ class Item {
   int itemCount = 1;
 }
 
-String generateDataPack() {
-  return "";
+late Directory appStorage;
+late Directory dataPacks;
+late File packScriptCompiler;
+
+void generateDataPack(String dataPackName) {
+  // Get path to AppData
+  Map<String, String> envVars = Platform.environment;
+  String? appDataPath = envVars["AppData"];
+  if (appDataPath == null) {
+    return;
+  }
+  Directory appData = Directory(appDataPath);
+  if (!appData.existsSync()) {
+    return;
+  }
+
+  // Get app storage directory
+  String appStoragePath = "$appDataPath\\gui_builder";
+  appStorage = Directory(appStoragePath);
+  if (!appStorage.existsSync()) {
+    return;
+  }
+
+  // Generate default datapack with callbacks
+  String packScriptCompilerPath = "$appStoragePath\\packscript.py";
+  File packScriptCompiler = File(packScriptCompilerPath);
+  if (!packScriptCompiler.existsSync()) {
+    return;
+  }
+
+  // Get app storage directory
+  String dataPacksPath = "$appStoragePath\\datapacks";
+  Directory dataPacks = Directory(dataPacksPath);
+  if (!dataPacks.existsSync()) {
+    return;
+  }
+
+  // Get app storage directory
+  String currentDataPackPath = "$dataPacksPath\\$dataPackName";
+  // Directory currentDataPack = Directory(currentDataPackPath);
+  // if (!currentDataPack.existsSync()) {
+  //   return;
+  // }
+
+  // ProcessResult result = 
+  Process.runSync("py", [
+    packScriptCompiler.path,
+    "init",
+    "-o \"${currentDataPackPath}\"",
+    "-N \"$dataPackName\"",
+    "-n \"${dataPackName.toLowerCase().replaceAll(RegExp("[- ]*"), "_")}\"",
+    "-f 71",
+  ]);
+}
+
+void aaa(String dataPackName) {
+  // Get app storage directory
+  String currentDataPackPath = "${dataPacks.path}\\$dataPackName";
+  Directory currentDataPack = Directory(currentDataPackPath);
+  if (!currentDataPack.existsSync()) {
+    return;
+  }
+
+  // ProcessResult result = 
+  Process.runSync("py", [
+    packScriptCompiler.path,
+    "comp",
+    "-i",
+    "\"${currentDataPack.path}\"",
+    "-o",
+    "\"${currentDataPack.path}.result\"",
+  ]);
 }
 
 String generateOpenDotMcFunction(String pageName) {
